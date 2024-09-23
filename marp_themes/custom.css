@@ -1,0 +1,112 @@
+/* @theme custom */
+
+@import 'default';
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@200;400;700&family=Noto+Serif+JP:wght@200;400;700&display=swap");
+
+/* Normal */
+section {
+    justify-content: normal;
+    font-size: 20px;
+    font-family: "Noto Serif JP";
+}
+
+section h2{
+    color: rgb(68, 67, 67);
+    font-size: 28px;
+    width: 93%;
+    border-bottom: 2px solid #D7D7D7;
+    position: absolute;
+    top:4%;
+    left:4%;
+}
+
+section h3{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 22px;
+}
+
+section p{
+    font-size: 20px;
+}
+
+section::after {
+    content: attr(data-marpit-pagination) ' / ' attr(data-marpit-pagination-total);
+    font-size: 20px;
+    color: #FFFFFF;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+footer {
+    box-sizing:border-box;
+    border:10px solid #0070C0;
+    background-color:#0070C0;
+    width:100%;
+    left: 0px;
+    bottom: 0px;
+    font:Arial;
+    color : white;
+    background-image: url(./corp-normal.png);
+    background-repeat: no-repeat;
+    background-size: 10%;
+    background-position: 10px top
+}
+
+footer a{
+    color: #FFFFFF;
+}
+
+/* Title slide */
+section.title{
+    justify-content: center;
+    background-size: 20%;
+    background: #0070C0;
+}
+
+section.title > footer {
+    display:none;
+}
+
+section.title h1{
+    width: 60%;
+    color: #FFFFFF;
+    font-size: 36px;
+    margin-top: 200px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    word-wrap: break-word;
+}
+
+section.title .author {
+    font-size: 26px;
+    color: #FFFFFF;
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+}
+
+section.title .author a{
+    color: #FFFFFF;
+    font-size: 26px;
+}
+
+div.corporate {
+    text-align: left;
+    font-size: 12px;
+    position: absolute;
+    bottom: 2%;
+    left: 50%;
+}
+
+/*  Last slide */
+
+section.last {
+    background-image: url(./corp-last.png);
+    background-repeat: no-repeat;
+    background-color:#0070C0;
+    background-size: 400px;
+    background-position-x: center;
+    background-position-y: center;
+}
