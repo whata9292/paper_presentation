@@ -12,7 +12,7 @@ echo "Finished creating docker image"
 echo "*******************************"
 
 echo "Start creating docker container without GPU"
-docker run --net host \
+docker run -p 5000:5000 \
            -v $(pwd):/workspace \
            --shm-size=$MEMORY \
            --name $DOCKER_CONTAINER_NAME \

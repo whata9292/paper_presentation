@@ -31,6 +31,9 @@ class Config:
     S3_DOWNLOAD_FOLDER_DIR = 'raw_files'
     S3_UPLOAD_FOLDER_DIR = 'paper'
 
+    # CloudFront settings
+    CLOUDFRONT_URL = os.getenv('CLOUDFRONT_URL', 'https://d2is53fus238ee.cloudfront.net')
+
     @classmethod
     def update(cls, **kwargs):
         for key, value in kwargs.items():
