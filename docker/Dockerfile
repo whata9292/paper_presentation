@@ -61,4 +61,6 @@ ENV PYTHONPATH /workspace
 # Add path to Marp CLI
 ENV PATH $PATH:/usr/local/bin
 
-RUN ["/bin/bash"]
+EXPOSE 5000
+
+RUN python3.11 app/main.py
