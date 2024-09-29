@@ -50,5 +50,4 @@ ENV PATH $PATH:/usr/local/bin
 
 EXPOSE 5000
 
-# RUN python3.11 app/main.py
-RUN /bin/bash
+CMD ["python3.11", "app/main.py"]
