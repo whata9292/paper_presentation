@@ -6,6 +6,7 @@ from flask_cors import CORS
 from app.services.s3_file_handler import S3FileHandler
 from app.services.read_pdf import read_pdf, save_text
 from app.services.create_prompt import create_system_prompt
+from app.db.models.summary_pages import SummaryPage
 from app.config import config
 
 import boto3
@@ -15,7 +16,7 @@ from langchain_community.chat_models import BedrockChat
 load_dotenv("config/.env")
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+CORS(app, resources={r"/api/*": {"origins": ["http://localhost", "http://localhost:3000"]}})
 
 
 def initialize_bedrock_client():
@@ -290,6 +291,27 @@ def process_pdf():
     else:
         return jsonify({"error": "Failed to fetch PDF from S3"}), 500
 
+
+@app.route('/api/summary_pages', methods=['GET'])
+def get_summary_pages():
+    try:
+        summary_pages = SummaryPage.get_all()
+        print(summary_pages)
+
+        return jsonify({
+            "summary_pages": [
+                {
+                    "id": page.id,
+                    "title": page.title,
+                    "url": page.url,
+                    "created_at": page.created_at.isoformat(),
+                    "updated_at": page.updated_at.isoformat()
+                } for page in summary_pages
+            ]
+        }), 200
+    except Exception as e:
+        print(f"Error in get_summary_pages: {str(e)}")
+        return jsonify({"error": "An internal server error occurred"}), 500
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)

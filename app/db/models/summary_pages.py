@@ -2,7 +2,7 @@ import uuid
 import sqlalchemy as sa
 from datetime import datetime
 
-from .base import Base, ModelInterface
+from .base import Base, ModelInterface, ScopedSession
 
 
 class SummaryPage(Base, ModelInterface):
@@ -23,3 +23,8 @@ class SummaryPage(Base, ModelInterface):
 
     def __repr__(self):
         return f"<SummaryPage {self.id} {self.title} {self.url}>"
+
+    @classmethod
+    def get_all(cls):
+        with ScopedSession() as session:
+            return session.query(cls).all()
