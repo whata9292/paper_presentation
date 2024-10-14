@@ -8,6 +8,8 @@ class Config:
     # OpenAI settings
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
     TEMPERATURE = float(os.getenv('TEMPERATURE', '0'))
+    MAX_TOKENS = int(os.getenv('MAX_TOKENS', '8192'))
+    TOP_P = float(os.getenv('TOP_P', '0.95'))
 
     # Claude settings
     ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
