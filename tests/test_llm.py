@@ -1,4 +1,4 @@
-from app.main import generate_summary, main
+from app.main import generate_slide, main
 
 def test_main():
     main()

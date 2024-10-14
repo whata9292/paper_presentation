@@ -6,7 +6,7 @@ from flask_cors import CORS
 from app.services.s3_file_handler import S3FileHandler
 from app.services.read_pdf import read_pdf, save_text
 from app.services.create_prompt import create_system_prompt
-from app.db.models.summary_pages import SummaryPage
+from app.db.models.summary_pages import SummaryPage, insert_or_update_record
 from app.config import config
 
 import boto3
@@ -29,7 +29,7 @@ def initialize_bedrock_client():
     return bedrock_client
 
 
-def generate_summary(
+def generate_slide(
         system_prompt: str,
         pdf_prompt: str
     ) -> str:
@@ -149,7 +149,7 @@ def main():
     pdf_file_name = input("Enter the name of PDF file: ")
 
     # Initialize PDFFetcher
-    pdf_fetcher = S3FileHandler(
+    s3_file_handler = S3FileHandler(
         aws_access_key_id=config.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=config.AWS_SECRET_ACCESS_KEY,
         region_name=config.AWS_DEFAULT_REGION
@@ -157,7 +157,7 @@ def main():
 
     # Fetch PDF from S3
     pdf_path = os.path.join('temp', pdf_file_name)
-    pdf_fetcher.fetch_file(
+    s3_file_handler.fetch_file(
         config.S3_BUCKET_NAME,
         config.S3_DOWNLOAD_FOLDER_DIR,
         pdf_file_name,
@@ -180,16 +180,10 @@ def main():
         )
 
         # Generate summary
-        output = generate_summary(prompt, pdf_text)
+        output = generate_slide(prompt, pdf_text)
 
         # Format check
         output = llm_format_check(output, config.MARP_TEMPLATE_PATH)
-
-        # Write output to markdown file
-        os.makedirs(config.OUTPUT_DIR, exist_ok=True)
-        out_md_file = os.path.join(config.OUTPUT_DIR, f'{pdf_name}.md')
-        with open(out_md_file, 'w') as file:
-            file.write(output)
 
         # Write output to markdown file
         os.makedirs(config.OUTPUT_DIR, exist_ok=True)
@@ -201,11 +195,18 @@ def main():
         out_pdf_file = os.path.join(config.OUTPUT_DIR, f'{pdf_name}_slide.html')
         convert_markdown_to_html(out_md_file, out_pdf_file)
 
-        pdf_fetcher.upload_file(
+        s3_file_handler.upload_file(
             out_pdf_file,
             config.S3_BUCKET_NAME,
             config.S3_UPLOAD_FOLDER_DIR,
             f'{pdf_name}_slide.html'
+        )
+
+        # Insert record into the database
+        insert_or_update_record(
+            pdf_name, 
+            f'{config.CLOUDFRONT_URL}/{config.S3_UPLOAD_FOLDER_DIR}/{pdf_name}_slide.html', 
+            output
         )
 
         print(f"Summary generated and saved to {config.OUTPUT_DIR}")
@@ -259,7 +260,7 @@ def process_pdf():
         )
 
         # Generate summary
-        output = generate_summary(prompt, pdf_text)
+        output = generate_slide(prompt, pdf_text)
 
         # Format check
         output = llm_format_check(output, config.MARP_TEMPLATE_PATH)

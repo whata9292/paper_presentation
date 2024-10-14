@@ -39,10 +39,18 @@ class SummaryPage(Base, ModelInterface):
             return summary
 
 
-def insert_record(title: str, url: str, summary: str):
-    summary_page = SummaryPage(title=title, url=url)
-    summary_page.summary = summary
+def insert_or_update_record(title: str, url: str, summary: str):
     with ScopedSession() as session:
-        session.add(summary_page)
+        record = session.query(SummaryPage).filter(
+            SummaryPage.title == title, 
+            SummaryPage.url == url
+        ).first()
+        if record:
+            record.summary = summary
+            record.updated_at = datetime.now()
+        else:
+            record = SummaryPage(title=title, url=url)
+            record.summary = summary
+            session.add(record)
         session.commit()
-        return summary_page.id
+        return record.id
