@@ -122,7 +122,7 @@ class S3FileHandler:
             self.logger.error(f"An error occurred while uploading: {e}")
             return False
 
-    def list_files(self, bucket_name: str, bucket_folder_dir: str, file_extension: str = '') -> list:
+    def get_file_lists(self, bucket_name: str, bucket_folder_dir: str, file_extension: str = '') -> list:
         """
         List all files with a specific extension in a S3 bucket directory.
 
@@ -142,6 +142,8 @@ class S3FileHandler:
             files = [obj['Key'] for obj in response.get('Contents', [])
                      if obj['Key'].lower().endswith(file_extension.lower())]
             self.logger.info(f"Found {len(files)} files with extension '{file_extension}' in s3://{bucket_name}/{bucket_folder_dir}")
+            files = [os.path.basename(file) for file in files]
+            files.remove('')
             return files
         except ClientError as e:
             self.logger.error(f"An error occurred while listing files: {e}")
