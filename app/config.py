@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 load_dotenv('../config/.env')
 
 class Config:
+    # Agent settings
+    AGENT_SETTINGS_PATH = os.getenv('AGENT_SETTINGS_PATH', 'templates/agent_settings.yaml')
+
     # OpenAI settings
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
     TEMPERATURE = float(os.getenv('TEMPERATURE', '0'))
@@ -23,7 +26,7 @@ class Config:
     AWS_DEFAULT_REGION = os.getenv('AWS_DEFAULT_REGION')
 
     # File paths
-    PROMPT_TEMPLATE_PATH = os.getenv('PROMPT_TEMPLATE_PATH', 'templates/prompt_template.txt')
+    PROMPT_TEMPLATE_PATH = os.getenv('PROMPT_TEMPLATE_PATH', 'templates/prompt_summary_generator.txt')
     MARP_TEMPLATE_PATH = os.getenv('MARP_TEMPLATE_PATH', 'marp_themes/template.md')
     CSS_TEMPLATE_PATH = os.getenv('CSS_TEMPLATE_PATH', 'marp_themes/custom.css')
     OUTPUT_DIR = os.getenv('OUTPUT_DIR', 'temp')

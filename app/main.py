@@ -1,10 +1,11 @@
 import os
 import glob
+import yaml
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from app.services.s3_file_handler import S3FileHandler
-from app.services.llm_handler import LLMHandler
+from app.services.llm_handler import LLMAgent
 from app.services.markdown_handler import convert_markdown_to_html
 from app.services.read_pdf import read_pdf, save_text
 from app.services.create_prompt import create_system_prompt
@@ -54,6 +55,20 @@ def main():
         region_name=config.AWS_DEFAULT_REGION
     )
 
+    # Generate Agents
+    with open(config.AGENT_SETTINGS_PATH, 'r') as file:
+        agent_settings = yaml.safe_load(file)
+    models = agent_settings['MODELS']
+
+    for _, v in models.items():
+        v['object'] = LLMAgent(
+            name=v['NAME'],
+            temperature=v['TEMPERATURE'],
+            max_tokens=v['MAX_TOKEN_SIZE'],
+            top_p=v['TOP_P']
+        )
+        v['object'].set_system_prompt(v['SYSTEM_PROMPT_PATH'])
+
     # Get the PDF file list from S3
     pdf_file_lists = s3_file_handler.get_file_lists(config.S3_BUCKET_NAME, config.S3_DOWNLOAD_FOLDER_DIR)
 
@@ -81,35 +96,20 @@ def main():
             # Optionally save the extracted text
             save_text(pdf_text, f'temp/{pdf_name}.txt')
 
-            # Create prompt
+            # Create prompt TODO: Modify PROMPT_TEMPLATE
             system_prompt = create_system_prompt(
                 config.PROMPT_TEMPLATE_PATH,
                 config.MARP_TEMPLATE_PATH,
                 config.CSS_TEMPLATE_PATH,
             )
+            models['PAPER_INTERPRETER']['object'].system_prompt = system_prompt
 
-            # Prepare LLM
-            paper_summary_llm = LLMHandler(
-                temperature=config.TEMPERATURE,
-                max_tokens=config.MAX_TOKENS,
-                top_p=config.TOP_P
-            )
-
-            content_prompt = f"pdfは以下の通り： \n\n{pdf_text}"
-
+            user_prompt = f"pdfは以下の通り： \n\n{pdf_text}"
             # Generate summary
-            output = paper_summary_llm.generate(system_prompt, content_prompt)
+            summary = models['PAPER_INTERPRETER']['object'].response(user_prompt)
 
-            # Format check LLM
-            format_check_llm = LLMHandler(
-                temperature=0.3,
-                max_tokens=6000,
-                top_p=0.95
-            )
-
-            output = format_check_llm.generate(
-                format_check_llm_system_prompt, 
-                f"Marpコンテンツは以下の通り：\n\n{output}"
+            output = models['FORMATTER']['object'].response( 
+                f"Marpコンテンツは以下の通り：\n\n{summary}"
             )
 
             # Write output to markdown file

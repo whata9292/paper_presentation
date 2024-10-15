@@ -4,6 +4,7 @@ from langchain_community.chat_models import BedrockChat
 
 from app.config import config
 
+
 class LLMHandler():
 
     def __init__(self, temperature: float, max_tokens: int, top_p: float):
@@ -43,3 +44,28 @@ class LLMHandler():
         # LLMを直接呼び出し
         response = self.llm.invoke(messages)
         return response.content
+
+
+class LLMAgent(LLMHandler):
+    def __init__(
+            self, 
+            name: str, 
+            temperature: float, 
+            max_tokens: int, 
+            top_p: float
+    ):
+        super().__init__(temperature, max_tokens, top_p)
+        self.system_prompt = ""
+        self.custom_prompt = ""
+        self.name = name
+
+    def set_system_prompt(self, system_prompt_path: str):
+        with open(system_prompt_path, 'r') as file:
+            self.system_prompt = file.read()
+    
+    def set_custom_prompt(self, custom_prompt_path: str):
+        with open(custom_prompt_path, 'r') as file:
+            self.custom_prompt = file.read()
+    
+    def response(self, user_input: str) -> str:
+        return self.generate(self.system_prompt, user_input)

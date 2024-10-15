@@ -1,0 +1,16 @@
+MODELS:
+  PAPER_INTERPRETER:
+    NAME: "paper_interpreter"
+    SYSTEM_PROMPT_PATH: "templates/prompt_summary_generator.txt"
+    TEMPERATURE: 0.5
+    MAX_TOKEN_SIZE: 8192
+    TOP_P: 0.95
+  FORMATTER:
+    NAME: "formatter"
+    SYSTEM_PROMPT_PATH: "templates/prompt_formatter.txt"
+    TEMPERATURE: 0.5
+    MAX_TOKEN_SIZE: 8192
+    TOP_P: 0.95
+ORDER:
+  - PAPER_INTERPRETER
+  - FORMATTER
