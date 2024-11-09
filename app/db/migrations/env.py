@@ -6,6 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from app.db.models.base import Base
+from urllib.parse import quote_plus
 
 import os
 
@@ -15,12 +16,19 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD")
 DB_HOST = os.environ.get("DB_HOST")
 DB_NAME = os.environ.get("DB_NAME")
 
+def get_url():
+    user = quote_plus(DB_USER)
+    password = quote_plus(DB_PASSWORD)
+    return f"postgresql://{user}:{password}@{DB_HOST}/{DB_NAME}?sslmode=require"
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 # config オブジェクトの sqlalchemy.url を上書き
-config.set_main_option("sqlalchemy.url", f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}")
+url = get_url()
+url = url.replace('%', '%%')
+config.set_main_option("sqlalchemy.url", url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
