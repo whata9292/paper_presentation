@@ -11,6 +11,10 @@ from app.services.create_prompt import create_system_prompt
 from app.db.models.summary_pages import SummaryPage
 from app.config import config
 
+import arxiv
+from urllib.request import urlretrieve
+
+
 load_dotenv("config/.env")
 
 app = Flask(__name__)
@@ -145,6 +149,48 @@ def main():
 
         else:
             print("Failed to fetch PDF from S3.")
+
+def pdf_fetcher(arxiv_url):
+
+    arxiv_id = arxiv_url.split('/')[-1]
+    if 'v' in arxiv_id: 
+        arxiv_id = arxiv_id.split('v')[0]
+        
+    client = arxiv.Client()
+    search = arxiv.Search(
+        query=f"id:{arxiv_id}",
+        max_results=1
+    )
+
+    results = client.results(search)
+    paper_list = list(results)
+
+    if len(paper_list) == 0:
+        return None
+    
+    paper = paper_list[0]
+    paper_name = paper.title.replace(" ", "_")
+    download_path = f"temp/{paper_name}.pdf"
+
+    print(f"Downloading PDF from {paper.pdf_url}")
+    urlretrieve(paper.pdf_url, download_path)
+    print(f"PDF downloaded to {download_path}")
+
+    s3_file_handler = S3FileHandler(
+        aws_access_key_id=config.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=config.AWS_SECRET_ACCESS_KEY,
+        region_name=config.AWS_DEFAULT_REGION
+    )
+
+    s3_file_handler.upload_file(
+        download_path,
+        config.S3_BUCKET_NAME,
+        config.S3_DOWNLOAD_FOLDER_DIR,
+        f'{paper_name}.pdf'
+    )
+    print(f"PDF uploaded to S3 bucket {config.S3_BUCKET_NAME}")
+
+    return f"Finished processing PDF from {arxiv_url}"
 
 
 @app.route('/api/process', methods=['POST'])

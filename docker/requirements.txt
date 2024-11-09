@@ -9,3 +9,4 @@ Flask==3.0.3
 flask-cors==5.0.0
 alembic==1.13.3
 psycopg2==2.9.9
+arxiv==2.1.3
