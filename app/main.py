@@ -18,23 +18,6 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": ["http://localhost", "http://localhost:3000"]}})
 
 
-format_check_llm_system_prompt = f"""
-    あなたは優秀な翻訳者兼フォーマッター。
-    与えられた英語もしくは日本語のMarpフォーマットのスライド内容を、
-    以下の規則に従って日本語に翻訳して：
-
-    - 出力は"---"から始めること
-    - テンプレートのMarp header, titleスライドはない場合には適切に追加すること
-    - スライドのタイトルと著者名は翻訳せず、元の英語のままにすること
-    - スライドに関係のない文章は削除すること
-    - それ以外のすべての内容を日本語に翻訳すること
-    - 技術用語や固有名詞は適切に扱うこと
-    - 翻訳後も元の意味を正確に保持すること
-    - 日本語として自然で読みやすい文章にすること
-    - 「である調」で翻訳すること
-"""
-
-
 def main():
     """
     Main function to orchestrate the PDF processing workflow.
